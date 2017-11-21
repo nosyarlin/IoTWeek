@@ -2,12 +2,14 @@ package xbee.udootest;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.usb.UsbManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +46,7 @@ public class MainActivity extends Activity{
     private TextView pulse;
     private TextView position;
     public TextView textMatrix;
+    public Button task1part2;
 
     private AdkReadTask mAdkReadTask;
 
@@ -62,6 +65,15 @@ public class MainActivity extends Activity{
         pulse  = (TextView) findViewById(R.id.textView_pulse);
         position  = (TextView) findViewById(R.id.textView_position);
         textMatrix = (TextView) findViewById(R.id.textMatrix);
+        task1part2 = (Button) findViewById(R.id.buttonTask1);
+
+        task1part2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(),Task1Part2Activity.class);
+                startActivity(intent);
+            }
+        });
 
         // Goes to Downloads and finds the file iris_train.arff
         File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -102,7 +114,7 @@ public class MainActivity extends Activity{
             e.printStackTrace();
         }
 
-        String myString = "Confusion Matrix \n";
+        String myString = "Confusion Matrix \n a   b  c   <-- Classified as\n";
         for (Integer[] row:matrix) {
             for (int col:row){
                 myString = myString + String.valueOf(col) + "  ";
@@ -115,9 +127,6 @@ public class MainActivity extends Activity{
         // report the number of correct and incorrect
         Toast.makeText(this,"correct: "+correct+ " incorrect: "+ incorrect,Toast.LENGTH_LONG*100).show();
         Log.i("test", "correct: "+correct+ " incorrect: "+ incorrect);
-
-
-
 
     }
 

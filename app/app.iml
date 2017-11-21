@@ -95,16 +95,18 @@
     <orderEntry type="jdk" jdkName="Android API 23 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="com.android.support:support-annotations:22.2.0@jar" level="project" />
-    <orderEntry type="library" exported="" name="__local_jars__:/Users/arroyo/Downloads/UDOOTestStart/app/libs/weka.jar:unspecified@jar" level="project" />
-    <orderEntry type="library" exported="" name="__local_jars__:/Users/arroyo/Downloads/UDOOTestStart/app/libs/wlsvm.jar:unspecified@jar" level="project" />
+    <orderEntry type="library" exported="" name="__local_jars__:/Users/arroyo/UDOOTestStart/app/libs/weka.jar:unspecified@jar" level="project" />
     <orderEntry type="library" exported="" name="com.firebase:firebase-client-android:2.2.4@jar" level="project" />
     <orderEntry type="library" exported="" name="com.firebase:firebase-client-jvm:2.2.4@jar" level="project" />
-    <orderEntry type="library" exported="" name="__local_jars__:/Users/arroyo/Downloads/UDOOTestStart/app/libs/adktoolkit-0.2.0.jar:unspecified@jar" level="project" />
+    <orderEntry type="library" exported="" name="__local_jars__:/Users/arroyo/UDOOTestStart/app/libs/adktoolkit-0.2.0.jar:unspecified@jar" level="project" />
     <orderEntry type="library" exported="" name="com.fasterxml.jackson.core:jackson-annotations:2.2.2@jar" level="project" />
+    <orderEntry type="library" exported="" name="__local_jars__:/Users/arroyo/UDOOTestStart/app/libs/libsvm.jar:unspecified@jar" level="project" />
     <orderEntry type="library" exported="" name="com.firebase:tubesock:0.0.11@jar" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:support-v4-22.2.0" level="project" />
     <orderEntry type="library" exported="" name="com.fasterxml.jackson.core:jackson-core:2.2.2@jar" level="project" />
-    <orderEntry type="library" exported="" name="__local_jars__:/Users/arroyo/Downloads/UDOOTestStart/app/libs/libsvm.jar:unspecified@jar" level="project" />
+    <orderEntry type="library" exported="" name="com.android.support.constraint:constraint-layout-solver:1.0.2@jar" level="project" />
+    <orderEntry type="library" exported="" name="com.android.support.constraint:constraint-layout-1.0.2" level="project" />
+    <orderEntry type="library" exported="" name="__local_jars__:/Users/arroyo/UDOOTestStart/app/libs/wlsvm.jar:unspecified@jar" level="project" />
     <orderEntry type="library" exported="" name="com.fasterxml.jackson.core:jackson-databind:2.2.2@jar" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:appcompat-v7-22.2.0" level="project" />
   </component>

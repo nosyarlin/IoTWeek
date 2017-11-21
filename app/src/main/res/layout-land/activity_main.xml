@@ -78,4 +78,12 @@
         android:text=""
         android:layout_alignParentBottom="true"/>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonTask1"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:text="Task 1 Part 2"/>
+
 </RelativeLayout>

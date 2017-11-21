@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="xbee.udootest.Task1Part2Activity">
+
+    <EditText
+        android:id="@+id/editSepalLength"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Sepal Length"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:padding="24dp"/>
+
+    <EditText
+        android:id="@+id/editSepalWidth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editSepalLength"
+        android:hint="Sepal Width"
+        android:padding="24dp"/>
+
+    <EditText
+        android:id="@+id/editPetalLength"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Petal Length"
+        android:layout_below="@+id/editSepalWidth"
+        android:padding="24dp"/>
+
+    <EditText
+        android:id="@+id/editPetalWidth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Petal Width"
+        android:layout_below="@+id/editPetalLength"
+        android:padding="24dp"/>
+
+    <Button
+        android:id="@+id/buttonTrain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Train"
+        android:layout_toLeftOf="@+id/buttonClassify"
+        android:layout_alignBottom="@+id/buttonClassify"/>
+
+    <Button
+        android:id="@+id/buttonClassify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Classify"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="12dp"/>
+
+
+</RelativeLayout>
