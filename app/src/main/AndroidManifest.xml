@@ -35,7 +35,10 @@
         </activity>
         <activity
             android:name=".Task1Part2Activity"
-            android:label="@string/title_activity_task1_part2"></activity>
+            android:label="@string/title_activity_task1_part2" />
+        <activity
+            android:name=".Main2Activity"
+            android:label="@string/title_activity_main2" />
     </application>
 
 </manifest>

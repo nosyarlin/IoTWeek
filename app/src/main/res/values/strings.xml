@@ -5,4 +5,5 @@
     <string name="pulse">Oxygen: </string>
     <string name="position">Position: </string>
     <string name="title_activity_task1_part2">Task1Part2Activity</string>
+    <string name="title_activity_main2">Main2Activity</string>
 </resources>

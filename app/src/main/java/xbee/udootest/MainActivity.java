@@ -6,13 +6,9 @@ import android.content.Intent;
 import android.hardware.usb.UsbManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import me.palazzetti.adktoolkit.AdkManager;
@@ -22,8 +18,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.lazy.IBk;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -45,10 +39,22 @@ public class MainActivity extends Activity{
     private TextView distance;
     private TextView pulse;
     private TextView position;
-    public TextView textMatrix;
+    public TextView mentalState;
+
     public Button task1part2;
+    public Button buttonStress;
+    public Button buttonNotStress;
+    public Button buttonTrain;
 
     private AdkReadTask mAdkReadTask;
+
+    public static Instances testingSet;
+    public FastVector fvWekaAttributes = null;
+
+    WLSVM svmCls = null;
+    public static final String svmModel = "original_stressModel";
+    public static final String stress = "Stressed";
+    public static final String not_stress = "Not Stressed";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,8 +70,11 @@ public class MainActivity extends Activity{
         distance  = (TextView) findViewById(R.id.textView_distance);
         pulse  = (TextView) findViewById(R.id.textView_pulse);
         position  = (TextView) findViewById(R.id.textView_position);
-        textMatrix = (TextView) findViewById(R.id.textMatrix);
         task1part2 = (Button) findViewById(R.id.buttonTask1);
+        buttonStress = (Button) findViewById(R.id.buttonStress);
+        buttonNotStress = (Button) findViewById(R.id.buttonNotStress);
+        buttonTrain = (Button) findViewById(R.id.buttonSaveData);
+        mentalState = (TextView) findViewById(R.id.textPrediction);
 
         task1part2.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,59 +84,74 @@ public class MainActivity extends Activity{
             }
         });
 
-        // Goes to Downloads and finds the file iris_train.arff
-        File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        File f = new File(root, "iris_train.arff");
-        BufferedReader inputReader;
+        Attribute Attribute1 = new Attribute("pulse");
+        Attribute Attribute2 = new Attribute("oxygen");
+        Attribute Attribute3 = new Attribute("position");
 
-        // Creates a reader for later use
-        inputReader = readFile(f);  // you need to code the readFile() that takes in a File object and returns a BufferedReader
-        int correct = 0, incorrect=0;
-        Integer[][] matrix = {{0,0,0},{0,0,0},{0,0,0}};
-        // No idea what's going on
-        try {
+        // Declare the class attribute along with its values(nominal)
 
-            Instances data = new Instances(inputReader);
-            data.setClassIndex(data.numAttributes() - 1);
-            Classifier ibk = new IBk();
-            ibk.buildClassifier(data);
-            f = new File(root, "iris_test.arff");
-            inputReader = readFile(f);
-            Instances test = new Instances(inputReader);
-            test.setClassIndex(test.numAttributes() -1);
-            for (int i = 0; i < test.numInstances(); i++) {
-                // Compare the prediction results with the actual class label
-                double pred = ibk.classifyInstance(test.instance(i));
-                double act = test.instance(i).classValue();
-                if(pred == act) correct += 1;
-                else incorrect += 1;
+        FastVector fvClassVal = new FastVector(2);
 
-                if (matrix[(int)pred][(int)act] == null) {
-                    matrix[(int)pred][(int)act] = 0;
-                }
-                else {
-                    matrix[(int)pred][(int)act] += 1;
+        fvClassVal.addElement("Stressed");
+        fvClassVal.addElement("Not Stressed");
+        Attribute ClassAttribute = new Attribute("class", fvClassVal);
+
+        // Declare the feature vector template
+
+        fvWekaAttributes = new FastVector(4);
+        fvWekaAttributes.addElement(Attribute1);
+        fvWekaAttributes.addElement(Attribute2);
+        fvWekaAttributes.addElement(Attribute3);
+        fvWekaAttributes.addElement(ClassAttribute);
+
+        // Creating testing instances object with name "TestingInstance"
+        // using the feature vector template we declared above
+        // and with initial capacity of 1
+
+        //testingSet is actually trainingSet but we lazy
+        testingSet = new Instances("TestingInstance", fvWekaAttributes, 50);
+
+        // Setting the column containing class labels:
+        testingSet.setClassIndex(testingSet.numAttributes() - 1);
+
+        // Clicking the stressed button adds current result as stressed to training data
+        buttonStress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addToTrainingSet(stress);
+            }
+        });
+
+        // Clicking not stressed button adds current result as not stressed to training data
+        buttonNotStress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addToTrainingSet(not_stress);
+            }
+        });
+
+        buttonTrain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                svmCls = new WLSVM();
+
+                try {
+                    //MainActivity.testingSet.setClassIndex(MainActivity.testingSet.numAttributes() - 1);
+                    svmCls.buildClassifier(MainActivity.testingSet);
+                    weka.core.SerializationHelper.write(svmModel, svmCls);
+
+                } catch (Exception ex){
+                    ex.printStackTrace();
                 }
             }
+        });
 
+        // Training with old data
+        try {
+            svmCls = (WLSVM) weka.core.SerializationHelper.read(svmModel);
         } catch (Exception e){
             e.printStackTrace();
         }
-
-        String myString = "Confusion Matrix \n a   b  c   <-- Classified as\n";
-        for (Integer[] row:matrix) {
-            for (int col:row){
-                myString = myString + String.valueOf(col) + "  ";
-            }
-            myString += "\n";
-        }
-
-
-        textMatrix.setText(myString);
-        // report the number of correct and incorrect
-        Toast.makeText(this,"correct: "+correct+ " incorrect: "+ incorrect,Toast.LENGTH_LONG*100).show();
-        Log.i("test", "correct: "+correct+ " incorrect: "+ incorrect);
-
     }
 
     @Override
@@ -153,17 +177,28 @@ public class MainActivity extends Activity{
         super.onDestroy();
         unregisterReceiver(mAdkManager.getUsbReceiver());
     }
+    public void TrainInput(double pulse, double oxygen, double position, String state) {
 
-    public BufferedReader readFile(File f) {
-        try {
-            FileReader fileReader = new FileReader(f);
-            return new BufferedReader(fileReader);
+        // Create and fill an instance, and add it to the testingSet
+        Instance iExample = new Instance(testingSet.numAttributes());
+        iExample.setValue((Attribute)fvWekaAttributes.elementAt(0), pulse);
+        iExample.setValue((Attribute)fvWekaAttributes.elementAt(1), oxygen);
+        iExample.setValue((Attribute)fvWekaAttributes.elementAt(2), position);
+        iExample.setValue((Attribute)fvWekaAttributes.elementAt(3), state);
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        // add the instance
+        testingSet.add(iExample);
+    }
+
+    public void addToTrainingSet(String state) {
+        String mDistance = distance.getText().toString();
+        String mPulse = pulse.getText().toString();
+        String mPosition = position.getText().toString();
+        if (!mDistance.isEmpty()
+                && !mPulse.isEmpty()
+                && !mPosition.isEmpty()) {
+            TrainInput(Double.valueOf(mDistance),Double.valueOf(mPulse),Double.valueOf(mPosition), state);
         }
-
-        return null;
     }
 
     // ToggleButton method - send message to SAM3X
@@ -176,6 +211,17 @@ public class MainActivity extends Activity{
         }
     }
 
+    public BufferedReader readFile(File f) {
+        try {
+            FileReader fileReader = new FileReader(f);
+            return new BufferedReader(fileReader);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
     /*
      * We put the readSerial() method in an AsyncTask to run the
      * continuous read task out of the UI main thread
@@ -210,6 +256,27 @@ public class MainActivity extends Activity{
             distance.setText(pulseRate + " (bpm)");
             pulse.setText(oxygenLvl + " (pct)");
             position.setText(pos + "");
+
+            // Create new instance to be classified
+            Instance iExample = new Instance(testingSet.numAttributes());
+            iExample.setValue((Attribute)fvWekaAttributes.elementAt(0), pulseRate);
+            iExample.setValue((Attribute)fvWekaAttributes.elementAt(1), oxygenLvl);
+            iExample.setValue((Attribute)fvWekaAttributes.elementAt(2), pos);
+            iExample.setValue((Attribute)fvWekaAttributes.elementAt(3), not_stress); //dummy
+
+            try{
+                int pred = (int) svmCls.classifyInstance(iExample);
+                switch (pred){
+                    case 0:
+                        mentalState.setText(stress);
+                        break;
+                    case 1:
+                        mentalState.setText(not_stress);
+                        break;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
