@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.hardware.usb.UsbManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -56,9 +57,7 @@ public class MainActivity extends Activity{
     float oxygenLvl;
 
     WLSVM svmCls = null;
-    public static final String svmModel = "original_stressModel";
-    public static final String stress = "Stressed";
-    public static final String not_stress = "Not Stressed";
+    public static final String svmModel = "fake_stressModel";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,72 +87,30 @@ public class MainActivity extends Activity{
             }
         });
 
-        Attribute Attribute1 = new Attribute("pulse");
-        Attribute Attribute2 = new Attribute("oxygen");
-        Attribute Attribute3 = new Attribute("position");
+        // Goes to Downloads and finds the file iris_train.arff
+        File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File f = new File(root, "stress_train.arff");
+        BufferedReader inputReader;
 
-        // Declare the class attribute along with its values(nominal)
+        // Creates a reader for later use
+        inputReader = readFile(f);  // you need to code the readFile() that takes in a File object and returns a BufferedReader
 
-        FastVector fvClassVal = new FastVector(2);
-
-        fvClassVal.addElement("Stressed");
-        fvClassVal.addElement("Not Stressed");
-        Attribute ClassAttribute = new Attribute("class", fvClassVal);
-
-        // Declare the feature vector template
-
-        fvWekaAttributes = new FastVector(4);
-        fvWekaAttributes.addElement(Attribute1);
-        fvWekaAttributes.addElement(Attribute2);
-        fvWekaAttributes.addElement(Attribute3);
-        fvWekaAttributes.addElement(ClassAttribute);
-
-        // Creating testing instances object with name "TestingInstance"
-        // using the feature vector template we declared above
-        // and with initial capacity of 1
-
-        //testingSet is actually trainingSet but we lazy
-        testingSet = new Instances("TestingInstance", fvWekaAttributes, 50);
-
-        // Setting the column containing class labels:
-        testingSet.setClassIndex(testingSet.numAttributes() - 1);
-
-        // Clicking the stressed button adds current result as stressed to training data
-        buttonStress.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addToTrainingSet(stress);
-            }
-        });
-
-        // Clicking not stressed button adds current result as not stressed to training data
-        buttonNotStress.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addToTrainingSet(not_stress);
-            }
-        });
-
-        buttonTrain.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                svmCls = new WLSVM();
-
-                try {
-                    //MainActivity.testingSet.setClassIndex(MainActivity.testingSet.numAttributes() - 1);
-                    svmCls.buildClassifier(MainActivity.testingSet);
-                    weka.core.SerializationHelper.write(svmModel, svmCls);
-
-                } catch (Exception ex){
-                    ex.printStackTrace();
-                }
-            }
-        });
 
         // Training with old data
         try {
             svmCls = (WLSVM) weka.core.SerializationHelper.read(svmModel);
         } catch (Exception e){
+            svmCls = new WLSVM();
+
+            try {
+                Instances data = new Instances(inputReader);
+                data.setClassIndex(data.numAttributes() - 1);
+                svmCls.buildClassifier(data);
+                weka.core.SerializationHelper.write(svmModel, svmCls);
+
+            } catch (Exception ex){
+                ex.printStackTrace();
+            }
             e.printStackTrace();
         }
     }
@@ -181,34 +138,7 @@ public class MainActivity extends Activity{
         super.onDestroy();
         unregisterReceiver(mAdkManager.getUsbReceiver());
     }
-    public void TrainInput(double pulse, double oxygen, double position, String state) {
 
-        // Create and fill an instance, and add it to the testingSet
-        Instance iExample = new Instance(testingSet.numAttributes());
-        iExample.setValue((Attribute)fvWekaAttributes.elementAt(0), pulse);
-        iExample.setValue((Attribute)fvWekaAttributes.elementAt(1), oxygen);
-        iExample.setValue((Attribute)fvWekaAttributes.elementAt(2), position);
-        iExample.setValue((Attribute)fvWekaAttributes.elementAt(3), state);
-
-        // add the instance
-        testingSet.add(iExample);
-        Toast.makeText(getApplicationContext(), "made "+state+ " data", Toast.LENGTH_SHORT).show();
-    }
-
-    public void addToTrainingSet(String state) {
-        String mDistance = String.valueOf(pulseRate);
-        String mPulse = String.valueOf(oxygenLvl);
-        String mPosition = position.getText().toString();
-        try{
-            if (!mDistance.isEmpty()
-                    && !mPulse.isEmpty()
-                    && !mPosition.isEmpty()) {
-                TrainInput(Double.valueOf(mDistance),Double.valueOf(mPulse),Double.valueOf(mPosition), state);
-
-            }
-        }catch(Exception e){
-        }
-    }
 
     // ToggleButton method - send message to SAM3X
     public void blinkLED(View v){
@@ -231,6 +161,50 @@ public class MainActivity extends Activity{
 
         return null;
     }
+
+    public Instances TrainInput(double pulse, double oxygen, double position) {
+        Attribute Attribute1 = new Attribute("pulse");
+        Attribute Attribute2 = new Attribute("oxygen");
+        Attribute Attribute3 = new Attribute("position");
+
+        // Declare the class attribute along with its values(nominal)
+        FastVector fvClassVal = new FastVector(2);
+
+        fvClassVal.addElement("State-stressed");
+        fvClassVal.addElement("State-notstressed");
+        Attribute ClassAttribute = new Attribute("class", fvClassVal);
+
+        // Declare the feature vector template
+
+        FastVector fvWekaAttributes = new FastVector(4);
+        fvWekaAttributes.addElement(Attribute1);
+        fvWekaAttributes.addElement(Attribute2);
+        fvWekaAttributes.addElement(Attribute3);
+        fvWekaAttributes.addElement(ClassAttribute);
+
+
+        // Creating testing instances object with name "TestingInstance"
+        // using the feature vector template we declared above
+        // and with initial capacity of 1
+
+        Instances testingSet = new Instances("TestingInstance", fvWekaAttributes, 1);
+
+        // Setting the column containing class labels:
+        testingSet.setClassIndex(testingSet.numAttributes() - 1);
+
+        // Create and fill an instance, and add it to the testingSet
+        Instance iExample = new Instance(testingSet.numAttributes());
+        iExample.setValue((Attribute)fvWekaAttributes.elementAt(0), pulse);
+        iExample.setValue((Attribute)fvWekaAttributes.elementAt(1), oxygen);
+        iExample.setValue((Attribute)fvWekaAttributes.elementAt(2), position);
+        iExample.setValue((Attribute)fvWekaAttributes.elementAt(4), "State-notstressed"); // dummy
+
+        // add the instance
+        testingSet.add(iExample);
+        return testingSet;
+    }
+
+
     /*
      * We put the readSerial() method in an AsyncTask to run the
      * continuous read task out of the UI main thread
@@ -266,24 +240,22 @@ public class MainActivity extends Activity{
             pulse.setText(oxygenLvl + " (pct)");
             position.setText(pos + "");
 
-            // Create new instance to be classified
-            Instance iExample = new Instance(testingSet.numAttributes());
-            iExample.setValue((Attribute)fvWekaAttributes.elementAt(0), pulseRate);
-            iExample.setValue((Attribute)fvWekaAttributes.elementAt(1), oxygenLvl);
-            iExample.setValue((Attribute)fvWekaAttributes.elementAt(2), pos);
-            iExample.setValue((Attribute)fvWekaAttributes.elementAt(3), not_stress); //dummy
-
+            Instances test = TrainInput(pulseRate,oxygenLvl,pos);
             try{
-                int pred = (int) svmCls.classifyInstance(iExample);
-                switch (pred){
+                double pred = svmCls.classifyInstance(test.instance(0));
+                String out = "";
+
+                switch ((int) pred){
                     case 0:
-                        mentalState.setText(stress);
+                        out = "STRESSED";
                         break;
                     case 1:
-                        mentalState.setText(not_stress);
+                        out = "Not stressed";
                         break;
                 }
-            } catch (Exception e) {
+                mentalState.setText(out);
+
+            } catch (Exception e){
                 e.printStackTrace();
             }
         }
