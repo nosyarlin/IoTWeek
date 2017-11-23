@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import me.palazzetti.adktoolkit.AdkManager;
@@ -50,6 +51,9 @@ public class MainActivity extends Activity{
 
     public static Instances testingSet;
     public FastVector fvWekaAttributes = null;
+
+    float pulseRate;
+    float oxygenLvl;
 
     WLSVM svmCls = null;
     public static final String svmModel = "original_stressModel";
@@ -188,16 +192,21 @@ public class MainActivity extends Activity{
 
         // add the instance
         testingSet.add(iExample);
+        Toast.makeText(getApplicationContext(), "made "+state+ " data", Toast.LENGTH_SHORT).show();
     }
 
     public void addToTrainingSet(String state) {
-        String mDistance = distance.getText().toString();
-        String mPulse = pulse.getText().toString();
+        String mDistance = String.valueOf(pulseRate);
+        String mPulse = String.valueOf(oxygenLvl);
         String mPosition = position.getText().toString();
-        if (!mDistance.isEmpty()
-                && !mPulse.isEmpty()
-                && !mPosition.isEmpty()) {
-            TrainInput(Double.valueOf(mDistance),Double.valueOf(mPulse),Double.valueOf(mPosition), state);
+        try{
+            if (!mDistance.isEmpty()
+                    && !mPulse.isEmpty()
+                    && !mPosition.isEmpty()) {
+                TrainInput(Double.valueOf(mDistance),Double.valueOf(mPulse),Double.valueOf(mPosition), state);
+
+            }
+        }catch(Exception e){
         }
     }
 
@@ -244,8 +253,8 @@ public class MainActivity extends Activity{
 
         protected void onProgressUpdate(String... progress) {
 
-            float pulseRate= (int)progress[0].charAt(0);
-            float oxygenLvl= (int)progress[0].charAt(1);
+            pulseRate= (int)progress[0].charAt(0);
+            oxygenLvl= (int)progress[0].charAt(1);
             float pos= (int)progress[0].charAt(2);
             int max = 255;
             if (pulseRate>max) pulseRate=max;
