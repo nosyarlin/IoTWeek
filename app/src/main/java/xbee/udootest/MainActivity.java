@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -45,9 +46,6 @@ public class MainActivity extends Activity{
     public TextView mentalState;
 
     public Button task1part2;
-    public Button buttonStress;
-    public Button buttonNotStress;
-    public Button buttonTrain;
 
     private AdkReadTask mAdkReadTask;
 
@@ -58,7 +56,9 @@ public class MainActivity extends Activity{
     float oxygenLvl;
 
     WLSVM svmCls = null;
+
     public static final String svmModel = "fake_stressModel2";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,12 +87,14 @@ public class MainActivity extends Activity{
         });
 
         // Goes to Downloads and finds the file stress_train.arff
+
         File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File f = new File(root, "stress_train.arff");
         BufferedReader inputReader;
 
         // Creates a reader for later use
         inputReader = readFile(f);
+
 
 
         // Training with old data
@@ -158,6 +160,7 @@ public class MainActivity extends Activity{
     }
 
     public void TrainInput(double pulse, double oxygen, double position) {
+
         Attribute Attribute1 = new Attribute("pulse");
         Attribute Attribute2 = new Attribute("oxygen");
         Attribute Attribute3 = new Attribute("position");
@@ -261,7 +264,6 @@ public class MainActivity extends Activity{
             distance.setText(pulseRate + " (bpm)");
             pulse.setText(oxygenLvl + " (pct)");
             position.setText(pos + "");
-
 
         }
     }
